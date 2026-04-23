@@ -22,5 +22,7 @@
       <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
     </PackageReference>
     <PackageReference Include="CommunityToolkit.Mvvm" />
+    <PackageReference Include="Wombat.IndustrialCommunication" />
+    <PackageReference Include="Wombat.IndustrialCommunication.Extensions.Bluetooth" />
   </ItemGroup>
 </Project>

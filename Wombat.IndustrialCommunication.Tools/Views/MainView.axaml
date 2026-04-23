@@ -1,0 +1,583 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Wombat.IndustrialCommunication.Tools.ViewModels"
+             mc:Ignorable="d"
+             d:DesignWidth="1600"
+             d:DesignHeight="920"
+             x:Class="Wombat.IndustrialCommunication.Tools.Views.MainView"
+             x:DataType="vm:MainViewModel"
+             x:CompileBindings="False">
+  <Design.DataContext>
+    <vm:MainViewModel />
+  </Design.DataContext>
+
+  <UserControl.Styles>
+    <Style Selector="Border.topBar">
+      <Setter Property="Background" Value="#EAF1FB" />
+      <Setter Property="BorderBrush" Value="#C7D7EE" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Padding" Value="8" />
+    </Style>
+    <Style Selector="Border.sideCard">
+      <Setter Property="Background" Value="#F8FAFD" />
+      <Setter Property="BorderBrush" Value="#D8E2F0" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="Padding" Value="8" />
+    </Style>
+    <Style Selector="Border.mainCard">
+      <Setter Property="Background" Value="#FFFFFF" />
+      <Setter Property="BorderBrush" Value="#D7E3F1" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="Padding" Value="10" />
+    </Style>
+    <Style Selector="Border.subtleCard">
+      <Setter Property="Background" Value="#F6F9FC" />
+      <Setter Property="BorderBrush" Value="#D7E3F1" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Padding" Value="8" />
+    </Style>
+    <Style Selector="Border.statusChip">
+      <Setter Property="Background" Value="#E8F5EC" />
+      <Setter Property="BorderBrush" Value="#9FD3B0" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="999" />
+      <Setter Property="Padding" Value="6,2" />
+    </Style>
+    <Style Selector="Border.metricCard">
+      <Setter Property="Background" Value="#F6F9FC" />
+      <Setter Property="BorderBrush" Value="#D7E3F1" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Padding" Value="8" />
+    </Style>
+    <Style Selector="Border.summaryCard">
+      <Setter Property="Background" Value="#FFFFFF" />
+      <Setter Property="BorderBrush" Value="#CFDDEE" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Padding" Value="8,6" />
+    </Style>
+    <Style Selector="Border.badge">
+      <Setter Property="Background" Value="#EEF5FF" />
+      <Setter Property="BorderBrush" Value="#7DAAF7" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="999" />
+      <Setter Property="Padding" Value="6,2" />
+      <Setter Property="Margin" Value="0,0,4,4" />
+    </Style>
+    <Style Selector="TextBlock.appTitle">
+      <Setter Property="FontSize" Value="20" />
+      <Setter Property="FontWeight" Value="Bold" />
+      <Setter Property="Foreground" Value="#15253A" />
+    </Style>
+    <Style Selector="TextBlock.sectionTitle">
+      <Setter Property="FontSize" Value="15" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Foreground" Value="#1D2B3F" />
+    </Style>
+    <Style Selector="TextBlock.metaLabel">
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="Foreground" Value="#5E738C" />
+    </Style>
+    <Style Selector="TextBlock.metaValue">
+      <Setter Property="FontSize" Value="15" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Foreground" Value="#15253A" />
+    </Style>
+    <Style Selector="TextBlock.fieldLabel">
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="Foreground" Value="#4F647E" />
+    </Style>
+    <Style Selector="TextBlock.muted">
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="Foreground" Value="#6C8097" />
+    </Style>
+    <Style Selector="TextBlock.navTitle">
+      <Setter Property="FontSize" Value="13" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Foreground" Value="#1A2B3E" />
+    </Style>
+    <Style Selector="TextBlock.navTag">
+      <Setter Property="Foreground" Value="#2B6FD6" />
+      <Setter Property="FontSize" Value="11" />
+    </Style>
+    <Style Selector="Border.navCard">
+      <Setter Property="Background" Value="#FFFFFF" />
+      <Setter Property="BorderBrush" Value="#D7E3F1" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Padding" Value="8" />
+      <Setter Property="Margin" Value="0,0,0,4" />
+    </Style>
+    <Style Selector="Border.navIndicator">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="CornerRadius" Value="999" />
+      <Setter Property="Width" Value="4" />
+    </Style>
+    <Style Selector="ListBoxItem:selected Border.navCard">
+      <Setter Property="Background" Value="#EAF3FF" />
+      <Setter Property="BorderBrush" Value="#2F7DFF" />
+      <Setter Property="BorderThickness" Value="1.5" />
+    </Style>
+    <Style Selector="ListBoxItem:selected Border.navIndicator">
+      <Setter Property="Background" Value="#2F7DFF" />
+    </Style>
+    <Style Selector="ListBoxItem:selected TextBlock.navTitle">
+      <Setter Property="Foreground" Value="#173A72" />
+    </Style>
+    <Style Selector="ListBoxItem:selected TextBlock.navTag">
+      <Setter Property="Foreground" Value="#1F61C8" />
+    </Style>
+    <Style Selector="ListBox.componentList">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+    </Style>
+    <Style Selector="ListBox.componentList ListBoxItem">
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Margin" Value="0" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+    </Style>
+    <Style Selector="Button.actionPrimary">
+      <Setter Property="Background" Value="#2F7DFF" />
+      <Setter Property="Foreground" Value="White" />
+      <Setter Property="BorderBrush" Value="#4F95FF" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="7" />
+      <Setter Property="Padding" Value="10,6" />
+      <Setter Property="MinWidth" Value="92" />
+    </Style>
+    <Style Selector="Button.actionSecondary">
+      <Setter Property="Background" Value="#F5F8FC" />
+      <Setter Property="Foreground" Value="#23405F" />
+      <Setter Property="BorderBrush" Value="#C6D6EA" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="7" />
+      <Setter Property="Padding" Value="10,6" />
+      <Setter Property="MinWidth" Value="92" />
+    </Style>
+    <Style Selector="Button.actionDanger">
+      <Setter Property="Background" Value="#FFF1F1" />
+      <Setter Property="Foreground" Value="#B6404F" />
+      <Setter Property="BorderBrush" Value="#F0B8BF" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="7" />
+      <Setter Property="Padding" Value="10,6" />
+      <Setter Property="MinWidth" Value="92" />
+    </Style>
+    <Style Selector="Button.actionPrimary:disabled, Button.actionSecondary:disabled, Button.actionDanger:disabled">
+      <Setter Property="Opacity" Value="0.48" />
+    </Style>
+    <Style Selector="TextBox, ComboBox">
+      <Setter Property="Background" Value="#FFFFFF" />
+      <Setter Property="BorderBrush" Value="#C9D8EA" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="Foreground" Value="#15253A" />
+      <Setter Property="Padding" Value="6,4" />
+      <Setter Property="MinHeight" Value="32" />
+    </Style>
+    <Style Selector="CheckBox">
+      <Setter Property="Foreground" Value="#1F3045" />
+    </Style>
+    <Style Selector="TabControl.contextTabs">
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="TabControl.contextTabs TabItem">
+      <Setter Property="Background" Value="#F7FAFD" />
+      <Setter Property="BorderBrush" Value="#D6E2EF" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="Foreground" Value="#425873" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="Padding" Value="10,4" />
+      <Setter Property="Margin" Value="0,0,4,0" />
+    </Style>
+    <Style Selector="TabControl.contextTabs TabItem:selected">
+      <Setter Property="Background" Value="#EAF3FF" />
+      <Setter Property="BorderBrush" Value="#2F7DFF" />
+      <Setter Property="Foreground" Value="#1F4FA6" />
+    </Style>
+  </UserControl.Styles>
+
+  <Grid Background="#EDF3F8" RowDefinitions="Auto,*" Margin="6" RowSpacing="6">
+    <Border Classes="topBar" Grid.Row="0">
+      <Grid ColumnDefinitions="188,*" ColumnSpacing="6">
+        <Border Classes="summaryCard">
+          <StackPanel Spacing="1" VerticalAlignment="Center">
+            <TextBlock Text="Wombat 通讯工作台" Classes="appTitle" />
+            <TextBlock Text="工业通讯调试工作台" Classes="muted" />
+          </StackPanel>
+        </Border>
+
+        <Border Grid.Column="1" Classes="summaryCard">
+          <StackPanel Spacing="2">
+            <TextBlock Text="当前组件" Classes="metaLabel" />
+            <TextBlock Text="{Binding SelectedDefinition.DisplayName}" Classes="metaValue" />
+            <TextBlock Text="{Binding SelectedCapabilitySummary}" Classes="muted" TextWrapping="Wrap" MaxLines="1" TextTrimming="CharacterEllipsis" />
+          </StackPanel>
+        </Border>
+      </Grid>
+    </Border>
+
+    <Grid Grid.Row="1" ColumnDefinitions="212,*,232" ColumnSpacing="6">
+      <Border Classes="sideCard" Grid.Column="0">
+        <Grid RowDefinitions="Auto,*" RowSpacing="10">
+          <StackPanel Spacing="2" Grid.Row="0">
+            <TextBlock Text="组件导航" Classes="sectionTitle" />
+            <TextBlock Text="先选择组件，再在中间区域完成连接或监听。" Classes="muted" TextWrapping="Wrap" />
+          </StackPanel>
+
+          <ListBox Grid.Row="1"
+                   Classes="componentList"
+                   ItemsSource="{Binding Components}"
+                   SelectedItem="{Binding SelectedComponent}"
+                   ScrollViewer.VerticalScrollBarVisibility="Auto"
+                   ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+            <ListBox.ItemTemplate>
+              <DataTemplate x:DataType="vm:CommunicationComponentItemViewModel">
+                <Border Classes="navCard">
+                  <Grid ColumnDefinitions="4,*" ColumnSpacing="8">
+                    <Border Classes="navIndicator" />
+                    <StackPanel Grid.Column="1" Spacing="2">
+                      <TextBlock Text="{Binding DisplayName}" Classes="navTitle" />
+                      <TextBlock Text="{Binding CategoryName}" Classes="navTag" />
+                      <TextBlock Text="{Binding BadgeSummary}" Classes="muted" TextWrapping="Wrap" />
+                    </StackPanel>
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+        </Grid>
+      </Border>
+
+      <ScrollViewer Grid.Column="1" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Spacing="8">
+          <Border Classes="mainCard">
+            <StackPanel Spacing="10">
+              <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                <StackPanel Spacing="2">
+                  <TextBlock Text="连接与监听" Classes="sectionTitle" />
+                  <TextBlock Text="{Binding ConnectionForm.ParameterSummary}" Classes="muted" TextWrapping="Wrap" />
+                </StackPanel>
+                <Border Grid.Column="1" Classes="statusChip" VerticalAlignment="Top" HorizontalAlignment="Right">
+                  <TextBlock Text="{Binding SessionStateText}" Foreground="{Binding StatusBrush}" FontWeight="SemiBold" />
+                </Border>
+              </Grid>
+
+              <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                <StackPanel Spacing="4" IsVisible="{Binding ConnectionForm.IsSerial}">
+                  <TextBlock Text="串口" Classes="fieldLabel" />
+                  <TextBox Text="{Binding ConnectionForm.PortName}" Watermark="COM1" />
+                </StackPanel>
+                <StackPanel Spacing="4" IsVisible="{Binding ConnectionForm.IsNetwork}">
+                  <TextBlock Text="IP 地址" Classes="fieldLabel" />
+                  <TextBox Text="{Binding ConnectionForm.Ip}" Watermark="127.0.0.1" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Spacing="4" IsVisible="{Binding ConnectionForm.IsSerial}">
+                  <TextBlock Text="波特率" Classes="fieldLabel" />
+                  <TextBox Text="{Binding ConnectionForm.BaudRate}" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Spacing="4" IsVisible="{Binding ConnectionForm.IsNetwork}">
+                  <TextBlock Text="端口" Classes="fieldLabel" />
+                  <TextBox Text="{Binding ConnectionForm.Port}" />
+                </StackPanel>
+              </Grid>
+
+              <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10" IsVisible="{Binding ConnectionForm.IsSerial}">
+                <StackPanel Spacing="4">
+                  <TextBlock Text="数据位" Classes="fieldLabel" />
+                  <TextBox Text="{Binding ConnectionForm.DataBits}" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Spacing="4">
+                  <TextBlock Text="停止位" Classes="fieldLabel" />
+                  <ComboBox ItemsSource="{Binding ConnectionForm.StopBitsOptions}" SelectedItem="{Binding ConnectionForm.SelectedStopBits}" />
+                </StackPanel>
+                <StackPanel Grid.Column="2" Spacing="4">
+                  <TextBlock Text="校验 / 握手" Classes="fieldLabel" />
+                  <Grid ColumnDefinitions="*,*" ColumnSpacing="6">
+                    <ComboBox ItemsSource="{Binding ConnectionForm.ParityOptions}" SelectedItem="{Binding ConnectionForm.SelectedParity}" />
+                    <ComboBox Grid.Column="1" ItemsSource="{Binding ConnectionForm.HandshakeOptions}" SelectedItem="{Binding ConnectionForm.SelectedHandshake}" />
+                  </Grid>
+                </StackPanel>
+              </Grid>
+
+              <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10" IsVisible="{Binding ConnectionForm.IsSiemens}">
+                <StackPanel Spacing="4">
+                  <TextBlock Text="PLC 机型" Classes="fieldLabel" />
+                  <ComboBox ItemsSource="{Binding ConnectionForm.SiemensVersions}" SelectedItem="{Binding ConnectionForm.SelectedSiemensVersion}" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Spacing="4">
+                  <TextBlock Text="Rack" Classes="fieldLabel" />
+                  <TextBox Text="{Binding ConnectionForm.Rack}" />
+                </StackPanel>
+                <StackPanel Grid.Column="2" Spacing="4">
+                  <TextBlock Text="Slot" Classes="fieldLabel" />
+                  <TextBox Text="{Binding ConnectionForm.Slot}" />
+                </StackPanel>
+              </Grid>
+
+              <Expander Header="高级配置" IsVisible="{Binding ConnectionForm.SupportsAutoReconnect}" Background="Transparent" Foreground="#31475F">
+                <StackPanel Spacing="10" Margin="0,8,0,0">
+                  <Grid ColumnDefinitions="Auto,Auto,*,*" ColumnSpacing="10">
+                    <CheckBox Content="长连接" IsChecked="{Binding ConnectionForm.IsLongConnection}" VerticalAlignment="Center" />
+                    <CheckBox Grid.Column="1" Content="自动重连" IsChecked="{Binding ConnectionForm.EnableAutoReconnect}" VerticalAlignment="Center" />
+                    <StackPanel Grid.Column="2" Spacing="4">
+                      <TextBlock Text="重连次数" Classes="fieldLabel" />
+                      <TextBox Text="{Binding ConnectionForm.MaxReconnectAttempts}" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="3" Spacing="4">
+                      <TextBlock Text="重连延迟(秒)" Classes="fieldLabel" />
+                      <TextBox Text="{Binding ConnectionForm.ReconnectDelaySeconds}" />
+                    </StackPanel>
+                  </Grid>
+                </StackPanel>
+              </Expander>
+
+              <Grid ColumnDefinitions="*,*" ColumnSpacing="10" IsVisible="{Binding ConnectionForm.SupportsMaxConnections}">
+                <StackPanel Spacing="4">
+                  <TextBlock Text="最大连接数" Classes="fieldLabel" />
+                  <TextBox Text="{Binding ConnectionForm.MaxConnections}" />
+                </StackPanel>
+                <Grid Grid.Column="1" ColumnDefinitions="*,*" ColumnSpacing="10" IsVisible="{Binding ConnectionForm.SupportsDefaultDb}">
+                  <StackPanel Spacing="4">
+                    <TextBlock Text="默认 DB 编号" Classes="fieldLabel" />
+                    <TextBox Text="{Binding ConnectionForm.DefaultDbNumber}" />
+                  </StackPanel>
+                  <StackPanel Grid.Column="1" Spacing="4">
+                    <TextBlock Text="默认 DB 大小" Classes="fieldLabel" />
+                    <TextBox Text="{Binding ConnectionForm.DefaultDbSize}" />
+                  </StackPanel>
+                </Grid>
+              </Grid>
+
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <Button Classes="actionPrimary" Content="{Binding StartButtonText}" Command="{Binding StartSessionCommand}" IsEnabled="{Binding CanStartSession}" />
+                <Button Classes="actionDanger" Content="{Binding StopButtonText}" Command="{Binding StopSessionCommand}" IsEnabled="{Binding CanStopSession}" />
+                <Button Classes="actionSecondary" Content="创建默认 DB" Command="{Binding CreateDefaultDbCommand}" IsVisible="{Binding ConnectionForm.SupportsDefaultDb}" IsEnabled="{Binding CanCreateDefaultDb}" />
+              </StackPanel>
+            </StackPanel>
+          </Border>
+
+          <Border Classes="mainCard" IsVisible="{Binding ShowAddressWorkbench}">
+            <StackPanel Spacing="10">
+              <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                <StackPanel Spacing="2">
+                  <TextBlock Text="统一地址工作区" Classes="sectionTitle" />
+                  <TextBlock Text="客户端与 S7 TCP 服务端在这里完成任意地址读写。" Classes="muted" TextWrapping="Wrap" />
+                </StackPanel>
+                <Border Grid.Column="1" Classes="statusChip" VerticalAlignment="Top" HorizontalAlignment="Right">
+                  <TextBlock Text="{Binding AddressWorkbench.LastDurationText}" Foreground="#275FB8" />
+                </Border>
+              </Grid>
+
+              <Grid ColumnDefinitions="2.2*,1*,0.8*,1.2*" ColumnSpacing="10">
+                <StackPanel Spacing="4">
+                  <TextBlock Text="地址" Classes="fieldLabel" />
+                  <TextBox Text="{Binding AddressWorkbench.Address}" Watermark="例如: DB1.DBW0 或 1;40001" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Spacing="4">
+                  <TextBlock Text="数据类型" Classes="fieldLabel" />
+                  <ComboBox ItemsSource="{Binding AddressWorkbench.SupportedDataTypes}" SelectedItem="{Binding AddressWorkbench.SelectedDataType}" />
+                </StackPanel>
+                <StackPanel Grid.Column="2" Spacing="4">
+                  <TextBlock Text="长度" Classes="fieldLabel" />
+                  <TextBox Text="{Binding AddressWorkbench.Length}" />
+                </StackPanel>
+                <StackPanel Grid.Column="3" Spacing="4">
+                  <TextBlock Text="写入值" Classes="fieldLabel" />
+                  <TextBox Text="{Binding AddressWorkbench.WriteValue}" />
+                </StackPanel>
+              </Grid>
+
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <Button Classes="actionPrimary" Content="读取" Command="{Binding ReadAddressCommand}" IsEnabled="{Binding CanUseAddressWorkbench}" MinWidth="96" />
+                <Button Classes="actionPrimary" Content="写入" Command="{Binding WriteAddressCommand}" IsEnabled="{Binding CanUseAddressWorkbench}" MinWidth="96" />
+              </StackPanel>
+
+              <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                <Border Classes="subtleCard">
+                  <StackPanel Spacing="6">
+                    <TextBlock Text="读取结果" Classes="fieldLabel" />
+                    <TextBox Text="{Binding AddressWorkbench.ReadResultText}" AcceptsReturn="True" Height="96" IsReadOnly="True" TextWrapping="Wrap" />
+                  </StackPanel>
+                </Border>
+                <Border Grid.Column="1" Classes="subtleCard">
+                  <StackPanel Spacing="6">
+                    <TextBlock Text="写入反馈" Classes="fieldLabel" />
+                    <TextBox Text="{Binding AddressWorkbench.WriteFeedbackText}" AcceptsReturn="True" Height="96" IsReadOnly="True" TextWrapping="Wrap" />
+                  </StackPanel>
+                </Border>
+              </Grid>
+            </StackPanel>
+          </Border>
+
+          <Border Classes="mainCard" IsVisible="{Binding ShowMemoryEditor}">
+            <StackPanel Spacing="10">
+              <TextBlock Text="Modbus DataStore 编辑器" Classes="sectionTitle" />
+              <TextBlock Text="RTU/TCP 服务端通过本地 DataStore 暴露内存镜像，这里用于任意偏移读写。" Classes="muted" TextWrapping="Wrap" />
+
+              <Grid ColumnDefinitions="1.2*,0.8*,0.8*,1*" ColumnSpacing="10">
+                <StackPanel Spacing="4">
+                  <TextBlock Text="区域" Classes="fieldLabel" />
+                  <ComboBox ItemsSource="{Binding ModbusMemoryEditor.Areas}" SelectedItem="{Binding ModbusMemoryEditor.SelectedArea}" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Spacing="4">
+                  <TextBlock Text="偏移" Classes="fieldLabel" />
+                  <TextBox Text="{Binding ModbusMemoryEditor.Offset}" />
+                </StackPanel>
+                <StackPanel Grid.Column="2" Spacing="4">
+                  <TextBlock Text="长度" Classes="fieldLabel" />
+                  <TextBox Text="{Binding ModbusMemoryEditor.Length}" />
+                </StackPanel>
+                <StackPanel Grid.Column="3" Spacing="4">
+                  <TextBlock Text="数据类型" Classes="fieldLabel" />
+                  <ComboBox ItemsSource="{Binding ModbusMemoryEditor.CurrentDataTypes}" SelectedItem="{Binding ModbusMemoryEditor.SelectedDataType}" />
+                </StackPanel>
+              </Grid>
+
+              <StackPanel Spacing="4">
+                <TextBlock Text="写入值" Classes="fieldLabel" />
+                <TextBox Text="{Binding ModbusMemoryEditor.WriteValue}" Watermark="布尔区用 true,false；寄存器区可写 1,2,3 或 12.5" />
+              </StackPanel>
+
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <Button Classes="actionPrimary" Content="读取快照" Command="{Binding ReadMemoryCommand}" IsEnabled="{Binding CanUseMemoryEditor}" />
+                <Button Classes="actionPrimary" Content="写入内存" Command="{Binding WriteMemoryCommand}" IsEnabled="{Binding CanUseMemoryEditor}" />
+              </StackPanel>
+
+              <Border Classes="subtleCard">
+                <StackPanel Spacing="6">
+                  <TextBlock Text="内存快照" Classes="fieldLabel" />
+                  <TextBox Text="{Binding ModbusMemoryEditor.SnapshotText}" AcceptsReturn="True" Height="132" IsReadOnly="True" TextWrapping="Wrap" />
+                </StackPanel>
+              </Border>
+            </StackPanel>
+          </Border>
+
+          <Border Classes="subtleCard">
+            <StackPanel Spacing="4">
+              <TextBlock Text="最近结果" Classes="fieldLabel" />
+              <TextBlock Text="{Binding LatestResult}" Foreground="#24384F" TextWrapping="Wrap" />
+            </StackPanel>
+          </Border>
+        </StackPanel>
+      </ScrollViewer>
+
+      <Border Classes="sideCard" Grid.Column="2" Padding="6">
+        <TabControl Classes="contextTabs">
+          <TabItem Header="说明">
+            <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+              <StackPanel Spacing="6" Margin="0,6,0,0">
+                <StackPanel Spacing="4">
+                  <TextBlock Text="能力标签" Classes="sectionTitle" />
+                  <ItemsControl ItemsSource="{Binding SelectedCapabilityBadges}">
+                    <ItemsControl.ItemsPanel>
+                      <ItemsPanelTemplate>
+                        <WrapPanel />
+                      </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate>
+                        <Border Classes="badge">
+                          <TextBlock Text="{Binding .}" Foreground="#275FB8" />
+                        </Border>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </StackPanel>
+
+                <Border Classes="subtleCard">
+                  <StackPanel Spacing="4">
+                    <TextBlock Text="组件说明" Classes="fieldLabel" />
+                    <TextBlock Text="{Binding SelectedSummary}" Foreground="#31475F" TextWrapping="Wrap" />
+                  </StackPanel>
+                </Border>
+
+                <Border Classes="subtleCard">
+                  <StackPanel Spacing="4">
+                    <TextBlock Text="当前提示" Classes="fieldLabel" />
+                    <TextBlock Text="{Binding WorkspaceStateMessage}" Foreground="#31475F" TextWrapping="Wrap" />
+                  </StackPanel>
+                </Border>
+              </StackPanel>
+            </ScrollViewer>
+          </TabItem>
+
+          <TabItem Header="示例">
+            <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+              <StackPanel Spacing="6" Margin="0,6,0,0">
+                <TextBlock Text="示例地址" Classes="sectionTitle" />
+                <ItemsControl ItemsSource="{Binding SelectedExampleAddresses}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                      <Border Classes="subtleCard" Margin="0,0,0,4">
+                        <TextBlock Text="{Binding .}" Foreground="#24384F" />
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <Border Classes="subtleCard">
+                  <StackPanel Spacing="4">
+                    <TextBlock Text="能力概览" Classes="fieldLabel" />
+                    <TextBlock Text="{Binding SelectedCapabilitySummary}" Foreground="#31475F" TextWrapping="Wrap" />
+                  </StackPanel>
+                </Border>
+
+                <Border Classes="subtleCard">
+                  <StackPanel Spacing="4">
+                    <TextBlock Text="快速提示" Classes="fieldLabel" />
+                    <ItemsControl ItemsSource="{Binding SelectedQuickTips}">
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                          <TextBlock Text="{Binding .}" Foreground="#31475F" TextWrapping="Wrap" Margin="0,0,0,4" />
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                  </StackPanel>
+                </Border>
+              </StackPanel>
+            </ScrollViewer>
+          </TabItem>
+
+          <TabItem Header="日志">
+            <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+              <StackPanel Spacing="6" Margin="0,6,0,0">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="4">
+                  <TextBlock Text="操作日志" Classes="sectionTitle" />
+                  <Button Grid.Column="1" Classes="actionSecondary" Content="清空" Command="{Binding ClearLogsCommand}" MinWidth="72" />
+                </Grid>
+
+                <ItemsControl ItemsSource="{Binding Logs}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:OperationLogItemViewModel">
+                      <Border Classes="subtleCard" Margin="0,0,0,4" BorderBrush="{Binding AccentBrush}">
+                        <StackPanel Spacing="2">
+                          <TextBlock Text="{Binding Action}" FontWeight="SemiBold" Foreground="#15253A" />
+                          <TextBlock Text="{Binding Component}" Foreground="#2B6FD6" />
+                          <TextBlock Text="{Binding Message}" Foreground="#31475F" TextWrapping="Wrap" />
+                          <StackPanel Orientation="Horizontal" Spacing="3">
+                            <TextBlock Text="{Binding Timestamp}" Classes="muted" />
+                            <TextBlock Text="{Binding StatusText}" Classes="muted" />
+                            <TextBlock Text="{Binding DurationText}" Classes="muted" />
+                          </StackPanel>
+                        </StackPanel>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+            </ScrollViewer>
+          </TabItem>
+        </TabControl>
+      </Border>
+    </Grid>
+  </Grid>
+</UserControl>

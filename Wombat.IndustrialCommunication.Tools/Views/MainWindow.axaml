@@ -1,0 +1,18 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Wombat.IndustrialCommunication.Tools.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:views="using:Wombat.IndustrialCommunication.Tools.Views"
+        mc:Ignorable="d"
+        d:DesignWidth="1600"
+        d:DesignHeight="920"
+        Width="1600"
+        Height="920"
+        MinWidth="1280"
+        MinHeight="760"
+        x:Class="Wombat.IndustrialCommunication.Tools.Views.MainWindow"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="Wombat 通讯工作台">
+  <views:MainView />
+</Window>

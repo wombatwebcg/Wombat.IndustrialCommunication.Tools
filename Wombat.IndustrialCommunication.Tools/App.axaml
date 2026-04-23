@@ -1,0 +1,21 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="using:Wombat.IndustrialCommunication.Tools"
+             xmlns:semi="https://irihi.tech/semi"
+             xmlns:uSemi="https://irihi.tech/ursa/themes/semi"
+             x:Class="Wombat.IndustrialCommunication.Tools.App"
+             RequestedThemeVariant="Light">
+             <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
+
+    <Application.DataTemplates>
+        <local:ViewLocator/>
+    </Application.DataTemplates>
+
+    <Application.Styles>
+        <semi:SemiTheme Locale="zh-CN" />
+        <uSemi:SemiTheme Locale="zh-CN" />
+        <Style Selector="Button">
+            <Setter Property="Transitions" Value="{x:Null}" />
+        </Style>
+    </Application.Styles>
+</Application>

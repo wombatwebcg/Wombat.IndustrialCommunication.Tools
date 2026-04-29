@@ -35,6 +35,12 @@ public partial class AddressWorkbenchViewModel : ViewModelBase
     [ObservableProperty] private string _readResultText = "连接成功后可在这里查看读取结果。";
     [ObservableProperty] private string _writeFeedbackText = "写入结果会显示在这里。";
     [ObservableProperty] private string _lastDurationText = "最近耗时: -";
+    [ObservableProperty] private int _autoReadIntervalMs = 1000;
+    [ObservableProperty] private int _autoWriteIntervalMs = 1000;
+    [ObservableProperty] private bool _isAutoReadRunning;
+    [ObservableProperty] private bool _isAutoWriteRunning;
+    [ObservableProperty] private string _autoReadStatusText = "定时读取未启动。";
+    [ObservableProperty] private string _autoWriteStatusText = "定时写入未启动。";
 
     public void ConfigureFor(CommunicationComponentDefinition? definition)
     {
@@ -42,6 +48,10 @@ public partial class AddressWorkbenchViewModel : ViewModelBase
         Length = 1;
         ReadResultText = "连接成功后可在这里查看读取结果。";
         WriteFeedbackText = "写入结果会显示在这里。";
+        IsAutoReadRunning = false;
+        IsAutoWriteRunning = false;
+        AutoReadStatusText = "定时读取未启动。";
+        AutoWriteStatusText = "定时写入未启动。";
         UpdateWriteSample();
     }
 
@@ -59,5 +69,21 @@ public partial class AddressWorkbenchViewModel : ViewModelBase
             DataTypeEnums.Double => "123.456",
             _ => "1"
         };
+    }
+
+    partial void OnAutoReadIntervalMsChanged(int value)
+    {
+        if (value < 1)
+        {
+            AutoReadIntervalMs = 1;
+        }
+    }
+
+    partial void OnAutoWriteIntervalMsChanged(int value)
+    {
+        if (value < 1)
+        {
+            AutoWriteIntervalMs = 1;
+        }
     }
 }

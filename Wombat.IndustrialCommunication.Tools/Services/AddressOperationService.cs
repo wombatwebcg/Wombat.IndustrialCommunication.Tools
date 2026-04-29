@@ -41,6 +41,8 @@ public sealed class AddressOperationService
 
             var result = accessor.Read(dataType, address.Trim(), Math.Max(1, length));
             response.SetInfo(result);
+            response.Requsts = result.Requsts;
+            response.Responses = result.Responses;
             response.ResultValue = result.IsSuccess ? FormatObject(result.ResultValue) : result.Message;
             return response.Complete();
         }
@@ -93,6 +95,8 @@ public sealed class AddressOperationService
             }
 
             response.SetInfo(result);
+            response.Requsts = result.Requsts;
+            response.Responses = result.Responses;
             if (!result.IsSuccess)
             {
                 response.ResultValue = result.Message;

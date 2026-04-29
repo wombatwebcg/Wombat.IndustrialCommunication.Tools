@@ -1,0 +1,14 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:views="using:Wombat.IndustrialCommunication.Tools.Views"
+             x:Class="Wombat.IndustrialCommunication.Tools.Views.MainWorkspaceView"
+             x:CompileBindings="False">
+  <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+    <StackPanel Spacing="8">
+      <views:ConnectionSessionView />
+      <views:AddressWorkbenchView IsVisible="{Binding ShowAddressWorkbench}" />
+      <views:MemoryEditorView IsVisible="{Binding ShowMemoryEditor}" />
+      <views:PacketTraceView />
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

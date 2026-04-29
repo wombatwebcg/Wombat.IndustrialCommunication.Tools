@@ -1,28 +1,44 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Media;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
+using Wombat.IndustrialCommunication;
 using Wombat.IndustrialCommunication.Tools.Models;
 using Wombat.IndustrialCommunication.Tools.Services;
+using Wombat.IndustrialCommunication.Tools.Services.Platform;
 
 namespace Wombat.IndustrialCommunication.Tools.ViewModels;
 
 public partial class MainViewModel : ViewModelBase, IDisposable
 {
     private readonly ComponentCatalogService _catalogService = new();
-    private readonly DeviceSessionService _sessionService = new();
+    private readonly DeviceSessionService _sessionService;
     private readonly AddressOperationService _addressOperationService = new();
     private readonly ModbusServerMemoryService _modbusMemoryService = new();
     private readonly OperationLogService _operationLogService = new();
+    private readonly IBluetoothPlatformService _bluetoothPlatformService;
+    private CancellationTokenSource? _addressAutoReadCts;
+    private CancellationTokenSource? _addressAutoWriteCts;
+    private CancellationTokenSource? _memoryAutoReadCts;
+    private CancellationTokenSource? _memoryAutoWriteCts;
 
     public MainViewModel()
+        : this(new DeviceSessionService(new UnsupportedBluetoothPlatformService()), new UnsupportedBluetoothPlatformService())
     {
+    }
+
+    public MainViewModel(DeviceSessionService sessionService, IBluetoothPlatformService bluetoothPlatformService)
+    {
+        _sessionService = sessionService;
+        _bluetoothPlatformService = bluetoothPlatformService;
         ConnectionForm = new ConnectionFormViewModel();
+        ConnectionForm.PropertyChanged += OnConnectionFormPropertyChanged;
         AddressWorkbench = new AddressWorkbenchViewModel();
         ModbusMemoryEditor = new ModbusMemoryEditorViewModel();
         Components = new ObservableCollection<CommunicationComponentItemViewModel>(_catalogService.GetComponents().Select(definition => new CommunicationComponentItemViewModel(definition)));
@@ -31,6 +47,10 @@ public partial class MainViewModel : ViewModelBase, IDisposable
 
     public ObservableCollection<CommunicationComponentItemViewModel> Components { get; }
     public ObservableCollection<OperationLogItemViewModel> Logs { get; } = [];
+    public ObservableCollection<PacketTraceItemViewModel> ClientSentPackets { get; } = [];
+    public ObservableCollection<PacketTraceItemViewModel> ClientReceivedPackets { get; } = [];
+    public ObservableCollection<PacketTraceItemViewModel> ServerSentPackets { get; } = [];
+    public ObservableCollection<PacketTraceItemViewModel> ServerReceivedPackets { get; } = [];
     public ConnectionFormViewModel ConnectionForm { get; }
     public AddressWorkbenchViewModel AddressWorkbench { get; }
     public ModbusMemoryEditorViewModel ModbusMemoryEditor { get; }
@@ -60,9 +80,16 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     public bool CanUseMemoryEditor => !IsBusy && IsSessionActive && ShowMemoryEditor && _sessionService.SupportsMemoryEditor;
     public bool CanCreateDefaultDb => !IsBusy && IsSessionActive && _sessionService.SupportsDefaultDbCreation;
     public string WorkspaceStateMessage => IsSessionActive ? "会话已建立，可以开始操作。" : "会话未建立，当前面板仅展示示例与说明。";
+    public bool ShowClientPacketTracePanel => SelectedDefinition?.IsServer != true;
+    public bool ShowServerPacketTracePanel => SelectedDefinition?.IsServer == true;
+    public string PacketTraceSectionTitle => ShowServerPacketTracePanel ? "服务端报文" : "客户端报文";
+    public string PacketTraceSectionDescription => ShowServerPacketTracePanel
+        ? "展示服务端设备发送和接收的原始报文，包含时间戳与报文意义。"
+        : "展示客户端设备发送和接收的原始报文，包含时间戳与报文意义。";
 
     partial void OnSelectedComponentChanged(CommunicationComponentItemViewModel? value)
     {
+        StopAllAutoOperations();
         if (_sessionService.HasActiveSession)
         {
             var stop = _sessionService.StopSession();
@@ -83,220 +110,40 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         StatusBrush = Brushes.SlateGray;
         StatusSummary = $"已切换到 {value.DisplayName}，请先完成参数配置。";
         LatestResult = value.Summary;
+        ClearPacketTraces();
+        if (ConnectionForm.IsBluetoothClient)
+        {
+            ConnectionForm.BluetoothStatusText = _bluetoothPlatformService.IsSupported
+                ? "正在准备 BLE 设备列表。"
+                : _bluetoothPlatformService.AvailabilityMessage;
+            _ = RefreshBluetoothDevicesAsync();
+        }
         NotifySelectionProperties();
     }
 
     partial void OnIsBusyChanged(bool value) => NotifyStateProperties();
     partial void OnIsSessionActiveChanged(bool value) => NotifyStateProperties();
 
-    [RelayCommand]
-    private async Task StartSessionAsync()
-    {
-        if (SelectedDefinition == null)
-        {
-            return;
-        }
-
-        var validation = ValidateSessionInput();
-        if (validation != null)
-        {
-            ApplyFailure(validation);
-            AppendLog("启动前校验", false, validation, null);
-            return;
-        }
-
-        IsBusy = true;
-        try
-        {
-            var result = await Task.Run(() => _sessionService.StartSession(SelectedDefinition, ConnectionForm, HandleBackgroundEvent));
-            if (result.IsSuccess)
-            {
-                IsSessionActive = true;
-                SessionStateText = SelectedDefinition.IsServer ? "监听中" : "已连接";
-                CurrentEndpoint = _sessionService.ActiveEndpoint;
-                StatusBrush = Brushes.SeaGreen;
-                StatusSummary = SelectedDefinition.IsServer ? "监听已启动，可使用下方工作区。" : "连接成功，可开始任意地址读写。";
-                LatestResult = result.Message;
-            }
-            else
-            {
-                ApplyFailure(result.Message);
-            }
-
-            AppendLog(StartButtonText, result.IsSuccess, result.Message, result.TimeConsuming);
-        }
-        finally
-        {
-            IsBusy = false;
-        }
-    }
-
-    [RelayCommand]
-    private async Task StopSessionAsync()
-    {
-        if (!IsSessionActive)
-        {
-            return;
-        }
-
-        IsBusy = true;
-        try
-        {
-            var result = await Task.Run(_sessionService.StopSession);
-            IsSessionActive = false;
-            SessionStateText = SelectedDefinition?.IsServer == true ? "未监听" : "未连接";
-            CurrentEndpoint = "未连接";
-            StatusBrush = result.IsSuccess ? Brushes.SlateGray : Brushes.IndianRed;
-            StatusSummary = result.IsSuccess ? "会话已停止。" : result.Message;
-            LatestResult = result.Message;
-            AppendLog(StopButtonText, result.IsSuccess, result.Message, result.TimeConsuming);
-        }
-        finally
-        {
-            IsBusy = false;
-        }
-    }
-
-    [RelayCommand]
-    private async Task ReadAddressAsync()
-    {
-        if (!CanUseAddressWorkbench || _sessionService.CurrentAddressAccessor == null)
-        {
-            return;
-        }
-
-        if (string.IsNullOrWhiteSpace(AddressWorkbench.Address) || AddressWorkbench.Length <= 0)
-        {
-            ApplyFailure("地址不能为空，长度至少为 1。");
-            return;
-        }
-
-        IsBusy = true;
-        try
-        {
-            var result = await Task.Run(() => _addressOperationService.Read(_sessionService.CurrentAddressAccessor, AddressWorkbench.SelectedDataType, AddressWorkbench.Address, AddressWorkbench.Length));
-            AddressWorkbench.ReadResultText = result.IsSuccess ? result.ResultValue ?? string.Empty : result.Message;
-            AddressWorkbench.LastDurationText = $"最近耗时: {(result.TimeConsuming.HasValue ? result.TimeConsuming.Value.ToString("0.##") : "-")} ms";
-            LatestResult = result.IsSuccess ? $"读取成功: {AddressWorkbench.ReadResultText}" : result.Message;
-            StatusBrush = result.IsSuccess ? Brushes.SeaGreen : Brushes.IndianRed;
-            AppendLog("读取地址", result.IsSuccess, result.Message, result.TimeConsuming);
-        }
-        finally
-        {
-            IsBusy = false;
-        }
-    }
-
-    [RelayCommand]
-    private async Task WriteAddressAsync()
-    {
-        if (!CanUseAddressWorkbench || _sessionService.CurrentAddressAccessor == null)
-        {
-            return;
-        }
-
-        if (string.IsNullOrWhiteSpace(AddressWorkbench.Address) || string.IsNullOrWhiteSpace(AddressWorkbench.WriteValue))
-        {
-            ApplyFailure("地址和值都不能为空。");
-            return;
-        }
-
-        IsBusy = true;
-        try
-        {
-            var result = await Task.Run(() => _addressOperationService.Write(_sessionService.CurrentAddressAccessor, AddressWorkbench.SelectedDataType, AddressWorkbench.Address, AddressWorkbench.WriteValue));
-            AddressWorkbench.WriteFeedbackText = result.IsSuccess ? $"写入成功: {result.ResultValue}" : result.Message;
-            AddressWorkbench.LastDurationText = $"最近耗时: {(result.TimeConsuming.HasValue ? result.TimeConsuming.Value.ToString("0.##") : "-")} ms";
-            LatestResult = AddressWorkbench.WriteFeedbackText;
-            StatusBrush = result.IsSuccess ? Brushes.SeaGreen : Brushes.IndianRed;
-            AppendLog("写入地址", result.IsSuccess, result.Message, result.TimeConsuming);
-        }
-        finally
-        {
-            IsBusy = false;
-        }
-    }
-
-    [RelayCommand]
-    private async Task ReadMemoryAsync()
-    {
-        if (!CanUseMemoryEditor || _sessionService.CurrentDataStore == null)
-        {
-            return;
-        }
-
-        IsBusy = true;
-        try
-        {
-            var result = await Task.Run(() => _modbusMemoryService.Read(_sessionService.CurrentDataStore, ModbusMemoryEditor.SelectedArea, ModbusMemoryEditor.Offset, ModbusMemoryEditor.Length, ModbusMemoryEditor.SelectedDataType));
-            ModbusMemoryEditor.SnapshotText = result.IsSuccess ? result.ResultValue ?? string.Empty : result.Message;
-            LatestResult = result.Message;
-            StatusBrush = result.IsSuccess ? Brushes.SeaGreen : Brushes.IndianRed;
-            AppendLog("读取 DataStore", result.IsSuccess, result.Message, result.TimeConsuming);
-        }
-        finally
-        {
-            IsBusy = false;
-        }
-    }
-
-    [RelayCommand]
-    private async Task WriteMemoryAsync()
-    {
-        if (!CanUseMemoryEditor || _sessionService.CurrentDataStore == null)
-        {
-            return;
-        }
-
-        IsBusy = true;
-        try
-        {
-            var result = await Task.Run(() => _modbusMemoryService.Write(_sessionService.CurrentDataStore, ModbusMemoryEditor.SelectedArea, ModbusMemoryEditor.Offset, ModbusMemoryEditor.SelectedDataType, ModbusMemoryEditor.WriteValue));
-            ModbusMemoryEditor.SnapshotText = result.IsSuccess ? result.ResultValue ?? string.Empty : result.Message;
-            LatestResult = result.Message;
-            StatusBrush = result.IsSuccess ? Brushes.SeaGreen : Brushes.IndianRed;
-            AppendLog("写入 DataStore", result.IsSuccess, result.Message, result.TimeConsuming);
-        }
-        finally
-        {
-            IsBusy = false;
-        }
-    }
-
-    [RelayCommand]
-    private async Task CreateDefaultDbAsync()
-    {
-        if (!CanCreateDefaultDb)
-        {
-            return;
-        }
-
-        if (ConnectionForm.DefaultDbNumber <= 0 || ConnectionForm.DefaultDbSize <= 0)
-        {
-            ApplyFailure("默认 DB 编号和大小必须大于 0。");
-            return;
-        }
-
-        IsBusy = true;
-        try
-        {
-            var result = await Task.Run(() => _sessionService.CreateDefaultDataBlock(ConnectionForm.DefaultDbNumber, ConnectionForm.DefaultDbSize));
-            LatestResult = result.Message;
-            StatusBrush = result.IsSuccess ? Brushes.SeaGreen : Brushes.IndianRed;
-            AppendLog("创建默认 DB", result.IsSuccess, result.Message, result.TimeConsuming);
-        }
-        finally
-        {
-            IsBusy = false;
-        }
-    }
-
-    [RelayCommand]
-    private void ClearLogs() => Logs.Clear();
-
     public void Dispose()
     {
+        StopAllAutoOperations();
+        ConnectionForm.PropertyChanged -= OnConnectionFormPropertyChanged;
         _sessionService.Dispose();
+    }
+
+    private void OnConnectionFormPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (!ConnectionForm.IsBluetoothClient)
+        {
+            return;
+        }
+
+        if (e.PropertyName == nameof(ConnectionFormViewModel.SelectedBluetoothDevice) &&
+            ConnectionForm.SelectedBluetoothDevice != null &&
+            !ConnectionForm.IsBluetoothBusy)
+        {
+            _ = RefreshBluetoothServicesAsync();
+        }
     }
 
     private void HandleBackgroundEvent(string action, string message)
@@ -308,47 +155,15 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         });
     }
 
-    private string? ValidateSessionInput()
+    private void HandleServerPacketTrace(PacketTraceEventArgs trace)
     {
-        if (SelectedDefinition == null)
+        Dispatcher.UIThread.Post(() =>
         {
-            return "请先选择组件。";
-        }
-
-        if (ConnectionForm.IsSerial && string.IsNullOrWhiteSpace(ConnectionForm.PortName))
-        {
-            return "串口名称不能为空。";
-        }
-
-        if (ConnectionForm.IsNetwork && string.IsNullOrWhiteSpace(ConnectionForm.Ip))
-        {
-            return "IP 不能为空。";
-        }
-
-        if (ConnectionForm.Port < 0 || ConnectionForm.MaxReconnectAttempts < 0 || ConnectionForm.ReconnectDelaySeconds < 0 || ConnectionForm.MaxConnections < 0)
-        {
-            return "端口、重连次数、重连延迟和最大连接数都不能为负数。";
-        }
-
-        return null;
+            var collection = trace.Direction == PacketTraceDirection.Sent ? ServerSentPackets : ServerReceivedPackets;
+            AppendPacket(collection, trace.Meaning, trace.HexText);
+        });
     }
 
-    private void AppendLog(string action, bool isSuccess, string message, double? durationMilliseconds)
-    {
-        var component = SelectedDefinition?.DisplayName ?? "未选择组件";
-        Logs.Insert(0, _operationLogService.Create(component, action, isSuccess, message, durationMilliseconds));
-        while (Logs.Count > 200)
-        {
-            Logs.RemoveAt(Logs.Count - 1);
-        }
-    }
-
-    private void ApplyFailure(string message)
-    {
-        StatusBrush = Brushes.IndianRed;
-        StatusSummary = message;
-        LatestResult = message;
-    }
 
     private void NotifySelectionProperties()
     {
@@ -362,6 +177,10 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         OnPropertyChanged(nameof(StopButtonText));
         OnPropertyChanged(nameof(ShowAddressWorkbench));
         OnPropertyChanged(nameof(ShowMemoryEditor));
+        OnPropertyChanged(nameof(ShowClientPacketTracePanel));
+        OnPropertyChanged(nameof(ShowServerPacketTracePanel));
+        OnPropertyChanged(nameof(PacketTraceSectionTitle));
+        OnPropertyChanged(nameof(PacketTraceSectionDescription));
         NotifyStateProperties();
     }
 

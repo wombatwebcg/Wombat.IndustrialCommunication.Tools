@@ -1,0 +1,114 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Wombat.IndustrialCommunication.Tools.ViewModels"
+             x:Class="Wombat.IndustrialCommunication.Tools.Views.ContextSidePanelView"
+             x:CompileBindings="False">
+  <Border Classes="sideCard" Padding="6">
+    <TabControl Classes="contextTabs">
+      <TabItem Header="说明">
+        <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+          <StackPanel Spacing="6" Margin="0,6,0,0">
+            <StackPanel Spacing="4">
+              <TextBlock Text="能力标签" Classes="sectionTitle" />
+              <ItemsControl ItemsSource="{Binding SelectedCapabilityBadges}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <WrapPanel />
+                  </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <Border Classes="badge">
+                      <TextBlock Text="{Binding .}" Foreground="#275FB8" />
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+
+            <Border Classes="subtleCard">
+              <StackPanel Spacing="4">
+                <TextBlock Text="组件说明" Classes="fieldLabel" />
+                <TextBlock Text="{Binding SelectedSummary}" Foreground="#31475F" TextWrapping="Wrap" />
+              </StackPanel>
+            </Border>
+
+            <Border Classes="subtleCard">
+              <StackPanel Spacing="4">
+                <TextBlock Text="当前提示" Classes="fieldLabel" />
+                <TextBlock Text="{Binding WorkspaceStateMessage}" Foreground="#31475F" TextWrapping="Wrap" />
+              </StackPanel>
+            </Border>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <TabItem Header="示例">
+        <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+          <StackPanel Spacing="6" Margin="0,6,0,0">
+            <TextBlock Text="示例地址" Classes="sectionTitle" />
+            <ItemsControl ItemsSource="{Binding SelectedExampleAddresses}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <Border Classes="subtleCard" Margin="0,0,0,4">
+                    <TextBlock Text="{Binding .}" Foreground="#24384F" />
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <Border Classes="subtleCard">
+              <StackPanel Spacing="4">
+                <TextBlock Text="能力概览" Classes="fieldLabel" />
+                <TextBlock Text="{Binding SelectedCapabilitySummary}" Foreground="#31475F" TextWrapping="Wrap" />
+              </StackPanel>
+            </Border>
+
+            <Border Classes="subtleCard">
+              <StackPanel Spacing="4">
+                <TextBlock Text="快速提示" Classes="fieldLabel" />
+                <ItemsControl ItemsSource="{Binding SelectedQuickTips}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                      <TextBlock Text="{Binding .}" Foreground="#31475F" TextWrapping="Wrap" Margin="0,0,0,4" />
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+            </Border>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <TabItem Header="日志">
+        <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+          <StackPanel Spacing="6" Margin="0,6,0,0">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="4">
+              <TextBlock Text="操作日志" Classes="sectionTitle" />
+              <Button Grid.Column="1" Classes="actionSecondary" Content="清空" Command="{Binding ClearLogsCommand}" MinWidth="72" />
+            </Grid>
+
+            <ItemsControl ItemsSource="{Binding Logs}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:OperationLogItemViewModel">
+                  <Border Classes="subtleCard" Margin="0,0,0,4" BorderBrush="{Binding AccentBrush}">
+                    <StackPanel Spacing="2">
+                      <TextBlock Text="{Binding Action}" FontWeight="SemiBold" Foreground="#15253A" />
+                      <TextBlock Text="{Binding Component}" Foreground="#2B6FD6" />
+                      <TextBlock Text="{Binding Message}" Foreground="#31475F" TextWrapping="Wrap" />
+                      <StackPanel Orientation="Horizontal" Spacing="3">
+                        <TextBlock Text="{Binding Timestamp}" Classes="muted" />
+                        <TextBlock Text="{Binding StatusText}" Classes="muted" />
+                        <TextBlock Text="{Binding DurationText}" Classes="muted" />
+                      </StackPanel>
+                    </StackPanel>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+    </TabControl>
+  </Border>
+</UserControl>

@@ -3,17 +3,27 @@ using System.IO.Ports;
 using System.Linq;
 using Wombat.Extensions.DataTypeExtensions;
 using Wombat.IndustrialCommunication;
+using Wombat.IndustrialCommunication.Extensions.Bluetooth.Factory;
+using Wombat.IndustrialCommunication.Extensions.Bluetooth.Models;
+using Wombat.IndustrialCommunication.Extensions.Bluetooth.Modbus;
 using Wombat.IndustrialCommunication.Modbus;
 using Wombat.IndustrialCommunication.Modbus.Data;
 using Wombat.IndustrialCommunication.PLC;
 using Wombat.IndustrialCommunication.Tools.Models;
+using Wombat.IndustrialCommunication.Tools.Services.Platform;
 using Wombat.IndustrialCommunication.Tools.ViewModels;
 
 namespace Wombat.IndustrialCommunication.Tools.Services;
 
 public sealed class DeviceSessionService : IDisposable
 {
+    private readonly IBluetoothPlatformService _bluetoothPlatformService;
     private SessionHandle? _currentSession;
+
+    public DeviceSessionService(IBluetoothPlatformService bluetoothPlatformService)
+    {
+        _bluetoothPlatformService = bluetoothPlatformService;
+    }
 
     public bool HasActiveSession => _currentSession != null;
     public bool SupportsAddressWorkbench => _currentSession?.AddressAccessor != null;
@@ -24,13 +34,17 @@ public sealed class DeviceSessionService : IDisposable
     public string ActiveEndpoint => _currentSession?.Endpoint ?? "未连接";
     public CommunicationComponentKind? ActiveKind => _currentSession?.Definition.Kind;
 
-    public OperationResult StartSession(CommunicationComponentDefinition definition, ConnectionFormViewModel form, Action<string, string>? eventSink)
+    public OperationResult StartSession(
+        CommunicationComponentDefinition definition,
+        ConnectionFormViewModel form,
+        Action<string, string>? eventSink,
+        Action<PacketTraceEventArgs>? packetSink)
     {
         StopSession();
 
         try
         {
-            var session = CreateSession(definition, form, eventSink);
+            var session = CreateSession(definition, form, eventSink, packetSink);
             var startResult = session.Start();
             if (!startResult.IsSuccess)
             {
@@ -89,18 +103,118 @@ public sealed class DeviceSessionService : IDisposable
 
     public void Dispose() => StopSession();
 
-    private static SessionHandle CreateSession(CommunicationComponentDefinition definition, ConnectionFormViewModel form, Action<string, string>? eventSink)
+    private SessionHandle CreateSession(
+        CommunicationComponentDefinition definition,
+        ConnectionFormViewModel form,
+        Action<string, string>? eventSink,
+        Action<PacketTraceEventArgs>? packetSink)
     {
         return definition.Kind switch
         {
             CommunicationComponentKind.ModbusRtuClient => CreateModbusRtuClientSession(definition, form),
+            CommunicationComponentKind.ModbusRtuBluetoothClient => CreateModbusRtuBluetoothClientSession(definition, form),
+            CommunicationComponentKind.ModbusRtuBluetoothServer => CreateModbusRtuBluetoothServerSession(definition, form, eventSink, packetSink),
             CommunicationComponentKind.ModbusTcpClient => CreateModbusTcpClientSession(definition, form),
             CommunicationComponentKind.SiemensClient => CreateSiemensClientSession(definition, form),
-            CommunicationComponentKind.ModbusRtuServer => CreateModbusRtuServerSession(definition, form, eventSink),
-            CommunicationComponentKind.ModbusTcpServer => CreateModbusTcpServerSession(definition, form, eventSink),
-            CommunicationComponentKind.S7TcpServer => CreateS7ServerSession(definition, form, eventSink),
+            CommunicationComponentKind.ModbusRtuServer => CreateModbusRtuServerSession(definition, form, eventSink, packetSink),
+            CommunicationComponentKind.ModbusTcpServer => CreateModbusTcpServerSession(definition, form, eventSink, packetSink),
+            CommunicationComponentKind.S7TcpServer => CreateS7ServerSession(definition, form, eventSink, packetSink),
             _ => throw new InvalidOperationException($"未知组件类型: {definition.Kind}")
         };
+    }
+
+    private SessionHandle CreateModbusRtuBluetoothClientSession(CommunicationComponentDefinition definition, ConnectionFormViewModel form)
+    {
+        var options = new BluetoothConnectionOptions
+        {
+            DeviceId = form.BluetoothDeviceId,
+            ServiceId = form.BluetoothServiceId,
+            WriteCharacteristicId = form.BluetoothWriteCharacteristicId,
+            NotifyCharacteristicId = form.BluetoothNotifyCharacteristicId,
+            ConnectTimeout = TimeSpan.FromSeconds(form.ConnectTimeoutSeconds),
+            ReceiveTimeout = TimeSpan.FromSeconds(form.ReceiveTimeoutSeconds),
+            SendTimeout = TimeSpan.FromSeconds(form.SendTimeoutSeconds)
+        };
+
+        var validation = options.Validate();
+        if (!validation.IsSuccess)
+        {
+            throw new InvalidOperationException(validation.Message);
+        }
+
+        var channelResult = _bluetoothPlatformService.CreateChannel(options);
+        if (!channelResult.IsSuccess || channelResult.ResultValue == null)
+        {
+            throw new InvalidOperationException(channelResult.Message);
+        }
+
+        var client = BluetoothClientFactory.CreateModbusRtuClient(channelResult.ResultValue, options);
+        client.IsLongConnection = form.IsLongConnection;
+        client.EnableAutoReconnect = form.EnableAutoReconnect;
+        client.MaxReconnectAttempts = form.MaxReconnectAttempts;
+        client.ReconnectDelay = TimeSpan.FromSeconds(form.ReconnectDelaySeconds);
+
+        var endpointName = string.IsNullOrWhiteSpace(form.BluetoothDeviceName) ? form.BluetoothDeviceId : form.BluetoothDeviceName;
+        return new SessionHandle(
+            definition,
+            $"{endpointName} / {form.BluetoothServiceId} / 写入 {form.BluetoothWriteCharacteristicId} / 通知 {form.BluetoothNotifyCharacteristicId}",
+            client.Connect,
+            client.Disconnect,
+            new DeviceAddressAccessor(client),
+            null,
+            null,
+            client,
+            null);
+    }
+
+    private SessionHandle CreateModbusRtuBluetoothServerSession(
+        CommunicationComponentDefinition definition,
+        ConnectionFormViewModel form,
+        Action<string, string>? eventSink,
+        Action<PacketTraceEventArgs>? packetSink)
+    {
+        var options = new BluetoothServerOptions
+        {
+            ServiceId = form.BluetoothServiceId,
+            WriteCharacteristicId = form.BluetoothWriteCharacteristicId,
+            NotifyCharacteristicId = form.BluetoothNotifyCharacteristicId,
+            ConnectTimeout = TimeSpan.FromSeconds(form.ConnectTimeoutSeconds),
+            ReceiveTimeout = TimeSpan.FromSeconds(form.ReceiveTimeoutSeconds),
+            SendTimeout = TimeSpan.FromSeconds(form.SendTimeoutSeconds)
+        };
+
+        var validation = options.Validate();
+        if (!validation.IsSuccess)
+        {
+            throw new InvalidOperationException(validation.Message);
+        }
+
+        var channelResult = _bluetoothPlatformService.CreateLocalServerChannel(options);
+        if (!channelResult.IsSuccess || channelResult.ResultValue == null)
+        {
+            throw new InvalidOperationException(channelResult.Message);
+        }
+
+        var server = new ModbusRtuBluetoothServer(channelResult.ResultValue)
+        {
+            ConnectTimeout = TimeSpan.FromSeconds(form.ConnectTimeoutSeconds),
+            ReceiveTimeout = TimeSpan.FromSeconds(form.ReceiveTimeoutSeconds),
+            SendTimeout = TimeSpan.FromSeconds(form.SendTimeoutSeconds)
+        };
+
+        EventHandler<DataStoreEventArgs> written = (_, args) => eventSink?.Invoke("服务端写入事件", FormatModbusEvent(args));
+        EventHandler<DataStoreEventArgs> read = (_, args) => eventSink?.Invoke("服务端读取事件", FormatModbusEvent(args));
+        EventHandler<PacketTraceEventArgs> traced = (_, args) => packetSink?.Invoke(args);
+        server.DataWritten += written;
+        server.DataRead += read;
+        server.PacketTraced += traced;
+
+        return new SessionHandle(definition, $"本机蓝牙服务 / {form.BluetoothServiceId}", server.Listen, server.Shutdown, null, server.DataStore, null, server, () =>
+        {
+            server.DataWritten -= written;
+            server.DataRead -= read;
+            server.PacketTraced -= traced;
+        });
     }
 
     private static SessionHandle CreateModbusRtuClientSession(CommunicationComponentDefinition definition, ConnectionFormViewModel form)
@@ -142,22 +256,33 @@ public sealed class DeviceSessionService : IDisposable
         return new SessionHandle(definition, $"{form.Ip}:{form.Port} / {form.SelectedSiemensVersion}", client.Connect, client.Disconnect, new DeviceAddressAccessor(client), null, null, client, null);
     }
 
-    private static SessionHandle CreateModbusRtuServerSession(CommunicationComponentDefinition definition, ConnectionFormViewModel form, Action<string, string>? eventSink)
+    private static SessionHandle CreateModbusRtuServerSession(
+        CommunicationComponentDefinition definition,
+        ConnectionFormViewModel form,
+        Action<string, string>? eventSink,
+        Action<PacketTraceEventArgs>? packetSink)
     {
         var server = new ModbusRtuServer(form.PortName, form.BaudRate, form.DataBits, form.ParseStopBits(), form.ParseParity(), form.ParseHandshake());
         EventHandler<DataStoreEventArgs> written = (_, args) => eventSink?.Invoke("服务端写入事件", FormatModbusEvent(args));
         EventHandler<DataStoreEventArgs> read = (_, args) => eventSink?.Invoke("服务端读取事件", FormatModbusEvent(args));
+        EventHandler<PacketTraceEventArgs> traced = (_, args) => packetSink?.Invoke(args);
         server.DataWritten += written;
         server.DataRead += read;
+        server.PacketTraced += traced;
 
         return new SessionHandle(definition, $"{form.PortName} / {form.BaudRate}bps", server.Listen, server.Shutdown, null, server.DataStore, null, server, () =>
         {
             server.DataWritten -= written;
             server.DataRead -= read;
+            server.PacketTraced -= traced;
         });
     }
 
-    private static SessionHandle CreateModbusTcpServerSession(CommunicationComponentDefinition definition, ConnectionFormViewModel form, Action<string, string>? eventSink)
+    private static SessionHandle CreateModbusTcpServerSession(
+        CommunicationComponentDefinition definition,
+        ConnectionFormViewModel form,
+        Action<string, string>? eventSink,
+        Action<PacketTraceEventArgs>? packetSink)
     {
         var server = new ModbusTcpServer(form.Ip, form.Port)
         {
@@ -165,17 +290,24 @@ public sealed class DeviceSessionService : IDisposable
         };
         EventHandler<DataStoreEventArgs> written = (_, args) => eventSink?.Invoke("服务端写入事件", FormatModbusEvent(args));
         EventHandler<DataStoreEventArgs> read = (_, args) => eventSink?.Invoke("服务端读取事件", FormatModbusEvent(args));
+        EventHandler<PacketTraceEventArgs> traced = (_, args) => packetSink?.Invoke(args);
         server.DataWritten += written;
         server.DataRead += read;
+        server.PacketTraced += traced;
 
         return new SessionHandle(definition, $"{form.Ip}:{form.Port}", server.Listen, server.Shutdown, null, server.DataStore, null, server, () =>
         {
             server.DataWritten -= written;
             server.DataRead -= read;
+            server.PacketTraced -= traced;
         });
     }
 
-    private static SessionHandle CreateS7ServerSession(CommunicationComponentDefinition definition, ConnectionFormViewModel form, Action<string, string>? eventSink)
+    private static SessionHandle CreateS7ServerSession(
+        CommunicationComponentDefinition definition,
+        ConnectionFormViewModel form,
+        Action<string, string>? eventSink,
+        Action<PacketTraceEventArgs>? packetSink)
     {
         var server = new S7TcpServer(form.Ip, form.Port)
         {
@@ -187,13 +319,16 @@ public sealed class DeviceSessionService : IDisposable
 
         EventHandler<S7DataStoreEventArgs> written = (_, args) => eventSink?.Invoke("DataWritten 事件", FormatS7Event(args));
         EventHandler<S7DataStoreEventArgs> read = (_, args) => eventSink?.Invoke("DataRead 事件", FormatS7Event(args));
+        EventHandler<PacketTraceEventArgs> traced = (_, args) => packetSink?.Invoke(args);
         server.DataWritten += written;
         server.DataRead += read;
+        server.PacketTraced += traced;
 
         return new SessionHandle(definition, $"{form.Ip}:{form.Port} / DB{form.DefaultDbNumber}", server.Listen, server.Shutdown, new S7AddressAccessor(server), null, server, server, () =>
         {
             server.DataWritten -= written;
             server.DataRead -= read;
+            server.PacketTraced -= traced;
         });
     }
 

@@ -1,0 +1,72 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Wombat.IndustrialCommunication.Tools.Views.MemoryEditorView"
+             x:CompileBindings="False">
+  <Border Classes="mainCard">
+    <StackPanel Spacing="10">
+      <TextBlock Text="Modbus DataStore 编辑器" Classes="sectionTitle" />
+      <TextBlock Text="RTU/TCP 服务端通过本地 DataStore 暴露内存镜像，这里用于任意偏移读写。" Classes="muted" TextWrapping="Wrap" />
+
+      <Grid ColumnDefinitions="1.2*,0.8*,0.8*,1*" ColumnSpacing="10">
+        <StackPanel Spacing="4">
+          <TextBlock Text="区域" Classes="fieldLabel" />
+          <ComboBox ItemsSource="{Binding ModbusMemoryEditor.Areas}" SelectedItem="{Binding ModbusMemoryEditor.SelectedArea}" />
+        </StackPanel>
+        <StackPanel Grid.Column="1" Spacing="4">
+          <TextBlock Text="偏移" Classes="fieldLabel" />
+          <TextBox Text="{Binding ModbusMemoryEditor.Offset}" />
+        </StackPanel>
+        <StackPanel Grid.Column="2" Spacing="4">
+          <TextBlock Text="长度" Classes="fieldLabel" />
+          <TextBox Text="{Binding ModbusMemoryEditor.Length}" />
+        </StackPanel>
+        <StackPanel Grid.Column="3" Spacing="4">
+          <TextBlock Text="数据类型" Classes="fieldLabel" />
+          <ComboBox ItemsSource="{Binding ModbusMemoryEditor.CurrentDataTypes}" SelectedItem="{Binding ModbusMemoryEditor.SelectedDataType}" />
+        </StackPanel>
+      </Grid>
+
+      <StackPanel Spacing="4">
+        <TextBlock Text="写入值" Classes="fieldLabel" />
+        <TextBox Text="{Binding ModbusMemoryEditor.WriteValue}" Watermark="布尔区用 true,false；寄存器区可写 1,2,3 或 12.5" />
+      </StackPanel>
+
+      <StackPanel Orientation="Horizontal" Spacing="6">
+        <Button Classes="actionPrimary" Content="读取快照" Command="{Binding ReadMemoryCommand}" IsEnabled="{Binding CanUseMemoryEditor}" />
+        <Button Classes="actionPrimary" Content="写入内存" Command="{Binding WriteMemoryCommand}" IsEnabled="{Binding CanUseMemoryEditor}" />
+      </StackPanel>
+
+      <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+        <Border Classes="subtleCard">
+          <StackPanel Spacing="6">
+            <TextBlock Text="定时读取快照" Classes="fieldLabel" />
+            <Grid ColumnDefinitions="1.2*,Auto,Auto" ColumnSpacing="6">
+              <TextBox Text="{Binding ModbusMemoryEditor.AutoReadIntervalMs}" Watermark="周期(ms)，最小 1" />
+              <Button Grid.Column="1" Content="启动" Command="{Binding StartMemoryAutoReadCommand}" IsEnabled="{Binding CanUseMemoryEditor}" />
+              <Button Grid.Column="2" Content="停止" Command="{Binding StopMemoryAutoReadCommand}" IsEnabled="{Binding ModbusMemoryEditor.IsAutoReadRunning}" />
+            </Grid>
+            <TextBlock Text="{Binding ModbusMemoryEditor.AutoReadStatusText}" Classes="muted" TextWrapping="Wrap" />
+          </StackPanel>
+        </Border>
+        <Border Grid.Column="1" Classes="subtleCard">
+          <StackPanel Spacing="6">
+            <TextBlock Text="定时写入内存" Classes="fieldLabel" />
+            <Grid ColumnDefinitions="1.2*,Auto,Auto" ColumnSpacing="6">
+              <TextBox Text="{Binding ModbusMemoryEditor.AutoWriteIntervalMs}" Watermark="周期(ms)，最小 1" />
+              <Button Grid.Column="1" Content="启动" Command="{Binding StartMemoryAutoWriteCommand}" IsEnabled="{Binding CanUseMemoryEditor}" />
+              <Button Grid.Column="2" Content="停止" Command="{Binding StopMemoryAutoWriteCommand}" IsEnabled="{Binding ModbusMemoryEditor.IsAutoWriteRunning}" />
+            </Grid>
+            <TextBlock Text="{Binding ModbusMemoryEditor.AutoWriteStatusText}" Classes="muted" TextWrapping="Wrap" />
+          </StackPanel>
+        </Border>
+      </Grid>
+
+      <Border Classes="subtleCard">
+        <StackPanel Spacing="6">
+          <TextBlock Text="内存快照" Classes="fieldLabel" />
+          <TextBox Text="{Binding ModbusMemoryEditor.SnapshotText}" AcceptsReturn="True" Height="132" IsReadOnly="True" TextWrapping="Wrap" />
+        </StackPanel>
+      </Border>
+    </StackPanel>
+  </Border>
+</UserControl>

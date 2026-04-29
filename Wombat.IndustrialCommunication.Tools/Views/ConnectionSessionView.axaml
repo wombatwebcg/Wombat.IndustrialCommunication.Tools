@@ -1,0 +1,232 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:model="using:Wombat.IndustrialCommunication.Tools.Models"
+             x:Class="Wombat.IndustrialCommunication.Tools.Views.ConnectionSessionView"
+             x:CompileBindings="False">
+  <Border Classes="mainCard">
+    <StackPanel Spacing="10">
+      <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+        <StackPanel Spacing="2">
+          <TextBlock Text="连接与监听" Classes="sectionTitle" />
+          <TextBlock Text="{Binding ConnectionForm.ParameterSummary}" Classes="muted" TextWrapping="Wrap" />
+        </StackPanel>
+        <Border Grid.Column="1" Classes="statusChip" VerticalAlignment="Top" HorizontalAlignment="Right">
+          <TextBlock Text="{Binding SessionStateText}" Foreground="{Binding StatusBrush}" FontWeight="SemiBold" />
+        </Border>
+      </Grid>
+
+      <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+        <StackPanel Spacing="4" IsVisible="{Binding ConnectionForm.IsSerial}">
+          <TextBlock Text="串口" Classes="fieldLabel" />
+          <TextBox Text="{Binding ConnectionForm.PortName}" Watermark="COM1" />
+        </StackPanel>
+        <StackPanel Spacing="4" IsVisible="{Binding ConnectionForm.IsNetwork}">
+          <TextBlock Text="IP 地址" Classes="fieldLabel" />
+          <TextBox Text="{Binding ConnectionForm.Ip}" Watermark="127.0.0.1" />
+        </StackPanel>
+
+        <StackPanel Grid.Column="1" Spacing="4" IsVisible="{Binding ConnectionForm.IsSerial}">
+          <TextBlock Text="波特率" Classes="fieldLabel" />
+          <TextBox Text="{Binding ConnectionForm.BaudRate}" />
+        </StackPanel>
+        <StackPanel Grid.Column="1" Spacing="4" IsVisible="{Binding ConnectionForm.IsNetwork}">
+          <TextBlock Text="端口" Classes="fieldLabel" />
+          <TextBox Text="{Binding ConnectionForm.Port}" />
+        </StackPanel>
+      </Grid>
+
+      <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10" IsVisible="{Binding ConnectionForm.IsSerial}">
+        <StackPanel Spacing="4">
+          <TextBlock Text="数据位" Classes="fieldLabel" />
+          <TextBox Text="{Binding ConnectionForm.DataBits}" />
+        </StackPanel>
+        <StackPanel Grid.Column="1" Spacing="4">
+          <TextBlock Text="停止位" Classes="fieldLabel" />
+          <ComboBox ItemsSource="{Binding ConnectionForm.StopBitsOptions}" SelectedItem="{Binding ConnectionForm.SelectedStopBits}" />
+        </StackPanel>
+        <StackPanel Grid.Column="2" Spacing="4">
+          <TextBlock Text="校验 / 握手" Classes="fieldLabel" />
+          <Grid ColumnDefinitions="*,*" ColumnSpacing="6">
+            <ComboBox ItemsSource="{Binding ConnectionForm.ParityOptions}" SelectedItem="{Binding ConnectionForm.SelectedParity}" />
+            <ComboBox Grid.Column="1" ItemsSource="{Binding ConnectionForm.HandshakeOptions}" SelectedItem="{Binding ConnectionForm.SelectedHandshake}" />
+          </Grid>
+        </StackPanel>
+      </Grid>
+
+      <Border Classes="subtleCard" IsVisible="{Binding ConnectionForm.IsBluetooth}">
+        <StackPanel Spacing="10">
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" IsVisible="{Binding ConnectionForm.IsBluetoothClient}">
+            <StackPanel Spacing="4">
+              <TextBlock Text="BLE 设备" Classes="fieldLabel" />
+              <Border Classes="subtleCard" Padding="0">
+                <ListBox Classes="bluetoothPicker"
+                         Height="132"
+                         ItemsSource="{Binding ConnectionForm.BluetoothDevices}"
+                         SelectedItem="{Binding ConnectionForm.SelectedBluetoothDevice}"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                  <ListBox.ItemTemplate>
+                    <DataTemplate x:DataType="model:BluetoothDeviceOption">
+                      <Border Classes="bluetoothOptionCard">
+                        <StackPanel Spacing="2">
+                          <TextBlock Text="{Binding DisplayName}" Classes="bluetoothOptionTitle" TextWrapping="Wrap" />
+                          <TextBlock Text="{Binding DeviceId}" Classes="bluetoothOptionMeta" TextWrapping="Wrap" />
+                          <TextBlock Text="{Binding Description}" Classes="bluetoothOptionMeta" TextWrapping="Wrap" />
+                        </StackPanel>
+                      </Border>
+                    </DataTemplate>
+                  </ListBox.ItemTemplate>
+                </ListBox>
+              </Border>
+            </StackPanel>
+            <Button Grid.Column="1" Classes="actionSecondary" Content="扫描设备" Command="{Binding RefreshBluetoothDevicesCommand}" VerticalAlignment="Bottom" />
+          </Grid>
+
+          <Grid ColumnDefinitions="*,*" ColumnSpacing="10" IsVisible="{Binding ConnectionForm.IsBluetoothClient}">
+            <StackPanel Spacing="4">
+              <TextBlock Text="设备标识" Classes="fieldLabel" />
+              <TextBox Text="{Binding ConnectionForm.BluetoothDeviceId}" Watermark="可手工填写 BLE 设备标识" />
+            </StackPanel>
+            <StackPanel Grid.Column="1" Spacing="4">
+              <TextBlock Text="设备名称" Classes="fieldLabel" />
+              <TextBox Text="{Binding ConnectionForm.BluetoothDeviceName}" Watermark="从设备列表自动带出" />
+            </StackPanel>
+          </Grid>
+
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" IsVisible="{Binding ConnectionForm.IsBluetoothClient}">
+            <StackPanel Spacing="4">
+              <TextBlock Text="自动识别结果" Classes="fieldLabel" />
+              <TextBlock Text="选择设备后，系统会自动查找可用的 BLE Service 与收发特征。" Classes="muted" TextWrapping="Wrap" />
+            </StackPanel>
+            <Button Grid.Column="1" Classes="actionSecondary" Content="重新识别 BLE" Command="{Binding RefreshBluetoothServicesCommand}" VerticalAlignment="Bottom" />
+          </Grid>
+
+          <Grid ColumnDefinitions="*,*" ColumnSpacing="10" IsVisible="{Binding ConnectionForm.IsBluetoothClient}">
+            <Border Classes="subtleCard">
+              <StackPanel Spacing="4">
+                <TextBlock Text="Service UUID" Classes="fieldLabel" />
+                <TextBox Text="{Binding ConnectionForm.BluetoothResolvedServiceText}" IsReadOnly="True" TextWrapping="Wrap" />
+              </StackPanel>
+            </Border>
+            <Border Grid.Column="1" Classes="subtleCard">
+              <StackPanel Spacing="4">
+                <TextBlock Text="写入特征 UUID" Classes="fieldLabel" />
+                <TextBox Text="{Binding ConnectionForm.BluetoothResolvedWriteCharacteristicText}" IsReadOnly="True" TextWrapping="Wrap" />
+              </StackPanel>
+            </Border>
+          </Grid>
+
+          <Border Classes="subtleCard" IsVisible="{Binding ConnectionForm.IsBluetoothClient}">
+            <StackPanel Spacing="4">
+              <TextBlock Text="通知 / 读取特征 UUID" Classes="fieldLabel" />
+              <TextBox Text="{Binding ConnectionForm.BluetoothResolvedNotifyCharacteristicText}" IsReadOnly="True" TextWrapping="Wrap" />
+            </StackPanel>
+          </Border>
+
+          <Grid ColumnDefinitions="*,*" ColumnSpacing="10" IsVisible="{Binding ConnectionForm.IsBluetoothServer}">
+            <StackPanel Spacing="4">
+              <TextBlock Text="本机设备名称" Classes="fieldLabel" />
+              <TextBox Text="{Binding ConnectionForm.BluetoothDeviceName}" IsReadOnly="True" />
+            </StackPanel>
+            <StackPanel Grid.Column="1" Spacing="4">
+              <TextBlock Text="本机 BLE 服务 UUID" Classes="fieldLabel" />
+              <TextBox Text="{Binding ConnectionForm.BluetoothServiceId}" />
+            </StackPanel>
+          </Grid>
+
+          <Grid ColumnDefinitions="*,*" ColumnSpacing="10" IsVisible="{Binding ConnectionForm.IsBluetoothServer}">
+            <StackPanel Spacing="4">
+              <TextBlock Text="本机写入特征 UUID" Classes="fieldLabel" />
+              <TextBox Text="{Binding ConnectionForm.BluetoothWriteCharacteristicId}" />
+            </StackPanel>
+            <StackPanel Grid.Column="1" Spacing="4">
+              <TextBlock Text="本机通知特征 UUID" Classes="fieldLabel" />
+              <TextBox Text="{Binding ConnectionForm.BluetoothNotifyCharacteristicId}" />
+            </StackPanel>
+          </Grid>
+
+          <TextBlock IsVisible="{Binding ConnectionForm.IsBluetoothServer}"
+                     Text="服务端将使用本机蓝牙适配器发布上述 BLE Service 和 Characteristic。"
+                     Classes="muted"
+                     TextWrapping="Wrap" />
+
+          <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
+            <StackPanel Spacing="4">
+              <TextBlock Text="连接超时(秒)" Classes="fieldLabel" />
+              <TextBox Text="{Binding ConnectionForm.ConnectTimeoutSeconds}" />
+            </StackPanel>
+            <StackPanel Grid.Column="1" Spacing="4">
+              <TextBlock Text="接收超时(秒)" Classes="fieldLabel" />
+              <TextBox Text="{Binding ConnectionForm.ReceiveTimeoutSeconds}" />
+            </StackPanel>
+            <StackPanel Grid.Column="2" Spacing="4">
+              <TextBlock Text="发送超时(秒)" Classes="fieldLabel" />
+              <TextBox Text="{Binding ConnectionForm.SendTimeoutSeconds}" />
+            </StackPanel>
+          </Grid>
+
+          <TextBlock Text="{Binding ConnectionForm.BluetoothStatusText}" Classes="muted" TextWrapping="Wrap" />
+        </StackPanel>
+      </Border>
+
+      <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10" IsVisible="{Binding ConnectionForm.IsSiemens}">
+        <StackPanel Spacing="4">
+          <TextBlock Text="PLC 机型" Classes="fieldLabel" />
+          <ComboBox ItemsSource="{Binding ConnectionForm.SiemensVersions}" SelectedItem="{Binding ConnectionForm.SelectedSiemensVersion}" />
+        </StackPanel>
+        <StackPanel Grid.Column="1" Spacing="4">
+          <TextBlock Text="Rack" Classes="fieldLabel" />
+          <TextBox Text="{Binding ConnectionForm.Rack}" />
+        </StackPanel>
+        <StackPanel Grid.Column="2" Spacing="4">
+          <TextBlock Text="Slot" Classes="fieldLabel" />
+          <TextBox Text="{Binding ConnectionForm.Slot}" />
+        </StackPanel>
+      </Grid>
+
+      <Expander Header="高级配置" IsVisible="{Binding ConnectionForm.SupportsAutoReconnect}" Background="Transparent" Foreground="#31475F">
+        <StackPanel Spacing="10" Margin="0,8,0,0">
+          <Grid ColumnDefinitions="Auto,Auto,*,*" ColumnSpacing="10">
+            <CheckBox Content="长连接" IsChecked="{Binding ConnectionForm.IsLongConnection}" VerticalAlignment="Center" />
+            <CheckBox Grid.Column="1" Content="自动重连" IsChecked="{Binding ConnectionForm.EnableAutoReconnect}" VerticalAlignment="Center" />
+            <StackPanel Grid.Column="2" Spacing="4">
+              <TextBlock Text="重连次数" Classes="fieldLabel" />
+              <TextBox Text="{Binding ConnectionForm.MaxReconnectAttempts}" />
+            </StackPanel>
+            <StackPanel Grid.Column="3" Spacing="4">
+              <TextBlock Text="重连延迟(秒)" Classes="fieldLabel" />
+              <TextBox Text="{Binding ConnectionForm.ReconnectDelaySeconds}" />
+            </StackPanel>
+          </Grid>
+        </StackPanel>
+      </Expander>
+
+      <Grid ColumnDefinitions="*,*" ColumnSpacing="10" IsVisible="{Binding ConnectionForm.SupportsMaxConnections}">
+        <StackPanel Spacing="4">
+          <TextBlock Text="最大连接数" Classes="fieldLabel" />
+          <TextBox Text="{Binding ConnectionForm.MaxConnections}" />
+        </StackPanel>
+        <Grid Grid.Column="1" ColumnDefinitions="*,*" ColumnSpacing="10" IsVisible="{Binding ConnectionForm.SupportsDefaultDb}">
+          <StackPanel Spacing="4">
+            <TextBlock Text="默认 DB 编号" Classes="fieldLabel" />
+            <TextBox Text="{Binding ConnectionForm.DefaultDbNumber}" />
+          </StackPanel>
+          <StackPanel Grid.Column="1" Spacing="4">
+            <TextBlock Text="默认 DB 大小" Classes="fieldLabel" />
+            <TextBox Text="{Binding ConnectionForm.DefaultDbSize}" />
+          </StackPanel>
+        </Grid>
+      </Grid>
+
+      <StackPanel Orientation="Horizontal" Spacing="6">
+        <Button Classes="actionPrimary" Content="{Binding StartButtonText}" Command="{Binding StartSessionCommand}" IsEnabled="{Binding CanStartSession}" />
+        <Button Classes="actionDanger" Content="{Binding StopButtonText}" Command="{Binding StopSessionCommand}" IsEnabled="{Binding CanStopSession}" />
+        <Button Classes="actionSecondary"
+                Content="创建默认 DB"
+                Command="{Binding CreateDefaultDbCommand}"
+                IsVisible="{Binding ConnectionForm.SupportsDefaultDb}"
+                IsEnabled="{Binding CanCreateDefaultDb}" />
+      </StackPanel>
+    </StackPanel>
+  </Border>
+</UserControl>

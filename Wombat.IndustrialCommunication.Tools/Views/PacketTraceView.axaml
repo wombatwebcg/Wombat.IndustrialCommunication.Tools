@@ -1,0 +1,105 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Wombat.IndustrialCommunication.Tools.ViewModels"
+             x:Class="Wombat.IndustrialCommunication.Tools.Views.PacketTraceView"
+             x:CompileBindings="False">
+  <Border Classes="mainCard">
+    <StackPanel Spacing="10">
+      <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+        <StackPanel Spacing="2">
+          <TextBlock Text="{Binding PacketTraceSectionTitle}" Classes="sectionTitle" />
+          <TextBlock Text="{Binding PacketTraceSectionDescription}" Classes="muted" TextWrapping="Wrap" />
+        </StackPanel>
+        <Button Grid.Column="1" Classes="actionSecondary" Content="清除内容" Command="{Binding ClearPacketTracesCommand}" VerticalAlignment="Top" />
+      </Grid>
+
+      <Grid ColumnDefinitions="*,*" ColumnSpacing="10" IsVisible="{Binding ShowClientPacketTracePanel}">
+        <Border Classes="subtleCard">
+          <StackPanel Spacing="6">
+            <TextBlock Text="客户端发送内容" Classes="fieldLabel" />
+            <ScrollViewer Height="180" HorizontalScrollBarVisibility="Disabled">
+              <ItemsControl ItemsSource="{Binding ClientSentPackets}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:PacketTraceItemViewModel">
+                    <Border Classes="summaryCard" Margin="0,0,0,6">
+                      <StackPanel Spacing="3">
+                        <TextBlock Text="{Binding Timestamp}" Classes="muted" />
+                        <TextBlock Text="{Binding Meaning}" Foreground="#15253A" FontWeight="SemiBold" TextWrapping="Wrap" />
+                        <TextBlock Text="{Binding Payload}" Foreground="#31475F" TextWrapping="Wrap" />
+                      </StackPanel>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </ScrollViewer>
+          </StackPanel>
+        </Border>
+
+        <Border Grid.Column="1" Classes="subtleCard">
+          <StackPanel Spacing="6">
+            <TextBlock Text="客户端接收内容" Classes="fieldLabel" />
+            <ScrollViewer Height="180" HorizontalScrollBarVisibility="Disabled">
+              <ItemsControl ItemsSource="{Binding ClientReceivedPackets}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:PacketTraceItemViewModel">
+                    <Border Classes="summaryCard" Margin="0,0,0,6">
+                      <StackPanel Spacing="3">
+                        <TextBlock Text="{Binding Timestamp}" Classes="muted" />
+                        <TextBlock Text="{Binding Meaning}" Foreground="#15253A" FontWeight="SemiBold" TextWrapping="Wrap" />
+                        <TextBlock Text="{Binding Payload}" Foreground="#31475F" TextWrapping="Wrap" />
+                      </StackPanel>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </ScrollViewer>
+          </StackPanel>
+        </Border>
+      </Grid>
+
+      <Grid ColumnDefinitions="*,*" ColumnSpacing="10" IsVisible="{Binding ShowServerPacketTracePanel}">
+        <Border Classes="subtleCard">
+          <StackPanel Spacing="6">
+            <TextBlock Text="服务端发送内容" Classes="fieldLabel" />
+            <ScrollViewer Height="180" HorizontalScrollBarVisibility="Disabled">
+              <ItemsControl ItemsSource="{Binding ServerSentPackets}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:PacketTraceItemViewModel">
+                    <Border Classes="summaryCard" Margin="0,0,0,6">
+                      <StackPanel Spacing="3">
+                        <TextBlock Text="{Binding Timestamp}" Classes="muted" />
+                        <TextBlock Text="{Binding Meaning}" Foreground="#15253A" FontWeight="SemiBold" TextWrapping="Wrap" />
+                        <TextBlock Text="{Binding Payload}" Foreground="#31475F" TextWrapping="Wrap" />
+                      </StackPanel>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </ScrollViewer>
+          </StackPanel>
+        </Border>
+
+        <Border Grid.Column="1" Classes="subtleCard">
+          <StackPanel Spacing="6">
+            <TextBlock Text="服务端接收内容" Classes="fieldLabel" />
+            <ScrollViewer Height="180" HorizontalScrollBarVisibility="Disabled">
+              <ItemsControl ItemsSource="{Binding ServerReceivedPackets}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:PacketTraceItemViewModel">
+                    <Border Classes="summaryCard" Margin="0,0,0,6">
+                      <StackPanel Spacing="3">
+                        <TextBlock Text="{Binding Timestamp}" Classes="muted" />
+                        <TextBlock Text="{Binding Meaning}" Foreground="#15253A" FontWeight="SemiBold" TextWrapping="Wrap" />
+                        <TextBlock Text="{Binding Payload}" Foreground="#31475F" TextWrapping="Wrap" />
+                      </StackPanel>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </ScrollViewer>
+          </StackPanel>
+        </Border>
+      </Grid>
+    </StackPanel>
+  </Border>
+</UserControl>

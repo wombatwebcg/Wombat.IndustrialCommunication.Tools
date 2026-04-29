@@ -1,0 +1,27 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Wombat.IndustrialCommunication.Tools.Views.MainHeaderView"
+             x:CompileBindings="False">
+  <Border Classes="topBar">
+    <Grid ColumnDefinitions="188,*" ColumnSpacing="6">
+      <Border Classes="summaryCard">
+        <StackPanel Spacing="1" VerticalAlignment="Center">
+          <TextBlock Text="Wombat 通讯工作台" Classes="appTitle" />
+          <TextBlock Text="工业通讯调试工作台" Classes="muted" />
+        </StackPanel>
+      </Border>
+
+      <Border Grid.Column="1" Classes="summaryCard">
+        <StackPanel Spacing="2">
+          <TextBlock Text="当前组件" Classes="metaLabel" />
+          <TextBlock Text="{Binding SelectedDefinition.DisplayName}" Classes="metaValue" />
+          <TextBlock Text="{Binding SelectedCapabilitySummary}"
+                     Classes="muted"
+                     TextWrapping="Wrap"
+                     MaxLines="1"
+                     TextTrimming="CharacterEllipsis" />
+        </StackPanel>
+      </Border>
+    </Grid>
+  </Border>
+</UserControl>

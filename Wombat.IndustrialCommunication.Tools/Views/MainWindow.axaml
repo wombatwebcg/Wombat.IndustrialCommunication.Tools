@@ -10,6 +10,8 @@
         Width="1600"
         Height="920"
         MinWidth="1280"
+        WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
         MinHeight="760"
         x:Class="Wombat.IndustrialCommunication.Tools.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"

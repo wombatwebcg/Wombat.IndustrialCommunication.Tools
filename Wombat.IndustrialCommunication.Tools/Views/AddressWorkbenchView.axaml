@@ -1,0 +1,82 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Wombat.IndustrialCommunication.Tools.Views.AddressWorkbenchView"
+             x:CompileBindings="False">
+  <Border Classes="mainCard">
+    <StackPanel Spacing="10">
+      <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+        <StackPanel Spacing="2">
+          <TextBlock Text="统一地址工作区" Classes="sectionTitle" />
+          <TextBlock Text="客户端与 S7 TCP 服务端在这里完成任意地址读写。" Classes="muted" TextWrapping="Wrap" />
+        </StackPanel>
+        <Border Grid.Column="1" Classes="statusChip" VerticalAlignment="Top" HorizontalAlignment="Right">
+          <TextBlock Text="{Binding AddressWorkbench.LastDurationText}" Foreground="#275FB8" />
+        </Border>
+      </Grid>
+
+      <Grid ColumnDefinitions="2.2*,1*,0.8*,1.2*" ColumnSpacing="10">
+        <StackPanel Spacing="4">
+          <TextBlock Text="地址" Classes="fieldLabel" />
+          <TextBox Text="{Binding AddressWorkbench.Address}" Watermark="例如: DB1.DBW0 或 1;40001" />
+        </StackPanel>
+        <StackPanel Grid.Column="1" Spacing="4">
+          <TextBlock Text="数据类型" Classes="fieldLabel" />
+          <ComboBox ItemsSource="{Binding AddressWorkbench.SupportedDataTypes}" SelectedItem="{Binding AddressWorkbench.SelectedDataType}" />
+        </StackPanel>
+        <StackPanel Grid.Column="2" Spacing="4">
+          <TextBlock Text="长度" Classes="fieldLabel" />
+          <TextBox Text="{Binding AddressWorkbench.Length}" />
+        </StackPanel>
+        <StackPanel Grid.Column="3" Spacing="4">
+          <TextBlock Text="写入值" Classes="fieldLabel" />
+          <TextBox Text="{Binding AddressWorkbench.WriteValue}" />
+        </StackPanel>
+      </Grid>
+
+      <StackPanel Orientation="Horizontal" Spacing="6">
+        <Button Classes="actionPrimary" Content="读取" Command="{Binding ReadAddressCommand}" IsEnabled="{Binding CanUseAddressWorkbench}" MinWidth="96" />
+        <Button Classes="actionPrimary" Content="写入" Command="{Binding WriteAddressCommand}" IsEnabled="{Binding CanUseAddressWorkbench}" MinWidth="96" />
+      </StackPanel>
+
+      <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+        <Border Classes="subtleCard">
+          <StackPanel Spacing="6">
+            <TextBlock Text="定时读取" Classes="fieldLabel" />
+            <Grid ColumnDefinitions="1.2*,Auto,Auto" ColumnSpacing="6">
+              <TextBox Text="{Binding AddressWorkbench.AutoReadIntervalMs}" Watermark="周期(ms)，最小 1" />
+              <Button Grid.Column="1" Content="启动" Command="{Binding StartAddressAutoReadCommand}" IsEnabled="{Binding CanUseAddressWorkbench}" />
+              <Button Grid.Column="2" Content="停止" Command="{Binding StopAddressAutoReadCommand}" IsEnabled="{Binding AddressWorkbench.IsAutoReadRunning}" />
+            </Grid>
+            <TextBlock Text="{Binding AddressWorkbench.AutoReadStatusText}" Classes="muted" TextWrapping="Wrap" />
+          </StackPanel>
+        </Border>
+        <Border Grid.Column="1" Classes="subtleCard">
+          <StackPanel Spacing="6">
+            <TextBlock Text="定时写入" Classes="fieldLabel" />
+            <Grid ColumnDefinitions="1.2*,Auto,Auto" ColumnSpacing="6">
+              <TextBox Text="{Binding AddressWorkbench.AutoWriteIntervalMs}" Watermark="周期(ms)，最小 1" />
+              <Button Grid.Column="1" Content="启动" Command="{Binding StartAddressAutoWriteCommand}" IsEnabled="{Binding CanUseAddressWorkbench}" />
+              <Button Grid.Column="2" Content="停止" Command="{Binding StopAddressAutoWriteCommand}" IsEnabled="{Binding AddressWorkbench.IsAutoWriteRunning}" />
+            </Grid>
+            <TextBlock Text="{Binding AddressWorkbench.AutoWriteStatusText}" Classes="muted" TextWrapping="Wrap" />
+          </StackPanel>
+        </Border>
+      </Grid>
+
+      <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+        <Border Classes="subtleCard">
+          <StackPanel Spacing="6">
+            <TextBlock Text="读取结果" Classes="fieldLabel" />
+            <TextBox Text="{Binding AddressWorkbench.ReadResultText}" AcceptsReturn="True" Height="96" IsReadOnly="True" TextWrapping="Wrap" />
+          </StackPanel>
+        </Border>
+        <Border Grid.Column="1" Classes="subtleCard">
+          <StackPanel Spacing="6">
+            <TextBlock Text="写入反馈" Classes="fieldLabel" />
+            <TextBox Text="{Binding AddressWorkbench.WriteFeedbackText}" AcceptsReturn="True" Height="96" IsReadOnly="True" TextWrapping="Wrap" />
+          </StackPanel>
+        </Border>
+      </Grid>
+    </StackPanel>
+  </Border>
+</UserControl>

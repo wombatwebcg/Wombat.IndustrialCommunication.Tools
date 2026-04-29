@@ -41,6 +41,12 @@ public partial class ModbusMemoryEditorViewModel : ViewModelBase
     [ObservableProperty] private int _length = 1;
     [ObservableProperty] private string _writeValue = "true";
     [ObservableProperty] private string _snapshotText = "监听成功后可在这里读取 DataStore 快照。";
+    [ObservableProperty] private int _autoReadIntervalMs = 1000;
+    [ObservableProperty] private int _autoWriteIntervalMs = 1000;
+    [ObservableProperty] private bool _isAutoReadRunning;
+    [ObservableProperty] private bool _isAutoWriteRunning;
+    [ObservableProperty] private string _autoReadStatusText = "定时读取未启动。";
+    [ObservableProperty] private string _autoWriteStatusText = "定时写入未启动。";
 
     public DataTypeEnums[] CurrentDataTypes => SelectedArea?.IsDiscreteArea == true ? DiscreteDataTypes : RegisterDataTypes;
 
@@ -52,6 +58,10 @@ public partial class ModbusMemoryEditorViewModel : ViewModelBase
         Length = 1;
         SnapshotText = definition?.DisplayName is null ? "监听成功后可在这里读取 DataStore 快照。" : $"{definition.DisplayName} 启动后，可在这里查看当前内存片段。";
         SelectedArea = Areas[0];
+        IsAutoReadRunning = false;
+        IsAutoWriteRunning = false;
+        AutoReadStatusText = "定时读取未启动。";
+        AutoWriteStatusText = "定时写入未启动。";
     }
 
     partial void OnSelectedAreaChanged(ModbusMemoryAreaOption? value)
@@ -60,5 +70,21 @@ public partial class ModbusMemoryEditorViewModel : ViewModelBase
         WriteValue = value?.IsDiscreteArea == true ? "true" : "1";
         OnPropertyChanged(nameof(CurrentDataTypes));
         OnPropertyChanged(nameof(IsDiscreteArea));
+    }
+
+    partial void OnAutoReadIntervalMsChanged(int value)
+    {
+        if (value < 1)
+        {
+            AutoReadIntervalMs = 1;
+        }
+    }
+
+    partial void OnAutoWriteIntervalMsChanged(int value)
+    {
+        if (value < 1)
+        {
+            AutoWriteIntervalMs = 1;
+        }
     }
 }

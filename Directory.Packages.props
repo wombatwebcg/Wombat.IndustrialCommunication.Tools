@@ -17,7 +17,7 @@
     <PackageVersion Include="Irihi.Ursa" Version="1.15.1" />
     <PackageVersion Include="Irihi.Ursa.Themes.Semi" Version="1.15.1" />
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-    <PackageVersion Include="Wombat.IndustrialCommunication" Version="2.1.29" />
+    <PackageVersion Include="Wombat.IndustrialCommunication" Version="2.1.30" />
     <PackageVersion Include="Wombat.IndustrialCommunication.Extensions.Bluetooth" Version="1.0.0" />
     <PackageVersion Include="Xamarin.AndroidX.Core.SplashScreen" Version="1.0.1.15" />
   </ItemGroup>

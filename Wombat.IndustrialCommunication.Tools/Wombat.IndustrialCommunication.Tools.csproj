@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
@@ -22,7 +22,10 @@
       <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
     </PackageReference>
     <PackageReference Include="CommunityToolkit.Mvvm" />
-    <PackageReference Include="Wombat.IndustrialCommunication" />
-    <PackageReference Include="Wombat.IndustrialCommunication.Extensions.Bluetooth" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Wombat.IndustrialCommunication\Wombat.IndustrialCommunication\Wombat.IndustrialCommunication.csproj" />
+    <ProjectReference Include="..\..\Wombat.IndustrialCommunication\Wombat.IndustrialCommunication.Extensions.Bluetooth\Wombat.IndustrialCommunication.Extensions.Bluetooth.csproj" />
   </ItemGroup>
 </Project>

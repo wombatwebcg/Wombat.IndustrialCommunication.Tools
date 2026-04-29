@@ -4,6 +4,7 @@ using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using System.Linq;
 using Avalonia.Markup.Xaml;
+using Wombat.IndustrialCommunication.Tools.Infrastructure;
 using Wombat.IndustrialCommunication.Tools.ViewModels;
 using Wombat.IndustrialCommunication.Tools.Views;
 
@@ -18,6 +19,8 @@ public partial class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
+        AppServices.Configure();
+
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
@@ -25,14 +28,14 @@ public partial class App : Application
             DisableAvaloniaDataAnnotationValidation();
             desktop.MainWindow = new MainWindow
             {
-                DataContext = new MainViewModel()
+                DataContext = AppServices.CreateMainViewModel()
             };
         }
         else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform)
         {
             singleViewPlatform.MainView = new MainView
             {
-                DataContext = new MainViewModel()
+                DataContext = AppServices.CreateMainViewModel()
             };
         }
 

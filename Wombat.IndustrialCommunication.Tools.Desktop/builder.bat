@@ -1,0 +1,1 @@
+dotnet build d:\Wombat\Wombat.IndustrialCommunication\Wombat.IndustrialCommunication.Tools\Wombat.IndustrialCommunication.Tools.Desktop\Wombat.IndustrialCommunication.Tools.Desktop.csproj -c Release
